@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DesktopGlass Status Map</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --ink: #16181d; --muted: #5d6573; --line: #dfe3ea;
+    --app: #2f6fde; --py: #c77d12; --rust: #c2452d; --data: #2a8a5c; --ext: #7a52c7; --sys: #5b6472;
+    --done: #2a8a5c; --wip: #c77d12; --todo: #8a93a3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1115; --card: #171a21; --ink: #e8eaef; --muted: #9aa3b2; --line: #2a2f3a;
+      --app: #6b9dff; --py: #f0a83a; --rust: #ff7a5c; --data: #4fc48a; --ext: #a988ff; --sys: #9aa3b2;
+      --done: #4fc48a; --wip: #f0a83a; --todo: #6c7484;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1115; --card: #171a21; --ink: #e8eaef; --muted: #9aa3b2; --line: #2a2f3a;
+    --app: #6b9dff; --py: #f0a83a; --rust: #ff7a5c; --data: #4fc48a; --ext: #a988ff; --sys: #9aa3b2;
+    --done: #4fc48a; --wip: #f0a83a; --todo: #6c7484;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 28px; margin: 0 0 4px; letter-spacing: -0.01em; }
+  h2 { font-size: 19px; margin: 40px 0 6px; }
+  p.lede { color: var(--muted); margin: 0 0 20px; max-width: 760px; }
+  p.sub { color: var(--muted); margin: 0 0 14px; max-width: 820px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 18px; overflow-x: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin: 12px 0 0; color: var(--muted); font-size: 13px; }
+  .legend i { display: inline-block; width: 11px; height: 11px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+  .mermaid { display: flex; justify-content: center; min-width: 760px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .stat h3 { margin: 0 0 6px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .stat ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13.5px; }
+  .pill { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 99px; color: #fff; }
+  .pill.done { background: var(--done); } .pill.wip { background: var(--wip); } .pill.todo { background: var(--todo); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  code { font: 12.5px ui-monospace, SFMono-Regular, Menlo, monospace; }
+  .stack { min-width: 0; }
+  .layer { border: 1px solid var(--line); border-left: 4px solid var(--c); border-radius: 12px; padding: 12px;
+    background: color-mix(in srgb, var(--c) 7%, transparent); }
+  .lt { font-weight: 650; font-size: 13.5px; margin-bottom: 10px; color: var(--c); }
+  .lt em { font-style: normal; color: var(--muted); font-weight: 500; }
+  .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; }
+  .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; }
+  .cols .layer { display: flex; flex-direction: column; gap: 8px; }
+  .cols .lt { margin-bottom: 2px; }
+  .b { background: var(--card); border: 1px solid color-mix(in srgb, var(--c) 45%, var(--line)); border-radius: 9px; padding: 8px 10px; }
+  .b b { display: block; font-size: 13.5px; font-weight: 600; }
+  .b span { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+  .b.dash { border-style: dashed; opacity: .85; }
+  .b.ext { border-color: color-mix(in srgb, var(--ext) 50%, var(--line)); }
+  .arrow { text-align: center; color: var(--muted); font-size: 12px; padding: 6px 0; letter-spacing: .02em; }
+  .you { --c: var(--sys); } .app { --c: var(--app); } .sys { --c: var(--sys); } .py { --c: var(--py); }
+  .rs { --c: var(--rust); } .data { --c: var(--data); }
+  @media (max-width: 640px) { .mermaid { min-width: 640px; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>DesktopGlass: where things stand</h1>
+  <p class="lede">Snapshot of the app on 6 Nov 2026, before the extension framework. The Swift app is the
+    frontend and still does most of the work. Python scripts are the live backend. The Rust engine is built
+    and bundled, but nothing calls it yet.</p>
+
+  <h2>1 · The whole system</h2>
+  <p class="sub">Top to bottom: what you touch, the app, what it drives, and the files underneath. Dashed boxes are planned.</p>
+  <div class="card">
+    <div class="stack">
+      <div class="layer you"><div class="lt">① You</div>
+        <div class="row">
+          <div class="b"><b>Island pill</b><span>click · two-finger swipe</span></div>
+          <div class="b"><b>⌘D · ⌥⌘D</b><span>⌘D works in every app</span></div>
+          <div class="b"><b>DesktopGlass mode switch</b><span>pill · pop-up · Settings · right-click</span></div>
+          <div class="b"><b>Wallpaper button</b><span>photo-stack icon on the pill</span></div>
+        </div></div>
+      <div class="arrow">▼ opens / toggles</div>
+      <div class="layer app"><div class="lt">② DesktopGlass.app · Swift frontend <em>(still does most of the work)</em></div>
+        <div class="row">
+          <div class="b"><b>AppDelegate</b><span>hub · HotKey · event tap · applies switches</span></div>
+          <div class="b"><b>Overlay panel</b><span>search · Apps · Games · terminal (starts collapsed)</span></div>
+          <div class="b"><b>Settings</b><span>writes UserDefaults</span></div>
+          <div class="b"><b>Wallpaper pop-up + Controller</b><span>one desktop window per screen</span></div>
+          <div class="b"><b>Editor · Artifact viewer</b><span>terminal, visual HTML, previews</span></div>
+          <div class="b"><b>ControlServer</b><span>localhost + token, for MCP app tools</span></div>
+        </div></div>
+      <div class="arrow">▼ drives</div>
+      <div class="cols">
+        <div class="layer sys"><div class="lt">③a macOS pieces the switch changes</div>
+          <div class="b"><b>Finder icons</b><span>CreateDesktop off/on + Finder restart</span></div>
+          <div class="b"><b>Dock</b><span>auto-hide on; your old setting restored when off</span></div>
+          <div class="b"><b>Wallpaper windows</b><span>image · looping video · YouTube with fallback</span></div>
+        </div>
+        <div class="layer py"><div class="lt">③b Backend today · Python + zsh</div>
+          <div class="b"><b>reindex.sh</b><span>run by Re-index / schedule → picks AI backend</span></div>
+          <div class="b"><b>inventory.py</b><span>scans Desktop, builds the index</span></div>
+          <div class="b"><b>local_index.py</b><span>on-device models</span></div>
+          <div class="b"><b>mcp_server.py</b><span>MCP over stdio; app tools via ControlServer</span></div>
+        </div>
+        <div class="layer rs"><div class="lt">③c Rust engine <code>dg</code> · bundled, idle</div>
+          <div class="b"><b>dg inventory</b><span>matches inventory.py on 101/101 checks · <strong>next: switch callers to it</strong></span></div>
+          <div class="b dash"><b>dg reindex · dg mcp</b><span>planned, Phases 2–4</span></div>
+          <div class="b dash"><b>dg engine daemon</b><span>planned, Phase 5 · <strong>extensions need this</strong></span></div>
+        </div>
+      </div>
+      <div class="arrow">▼ reads / writes</div>
+      <div class="layer data"><div class="lt">④ Files &amp; outside</div>
+        <div class="row">
+          <div class="b"><b>~/Desktop</b><span>description.md per folder · _Organize Log</span></div>
+          <div class="b"><b>UserDefaults · App Support</b><span>switches · Wallpapers · control.json</span></div>
+          <div class="b ext"><b>AI backends</b><span>agent CLIs · on-device models</span></div>
+          <div class="b ext"><b>MCP clients</b><span>Claude Code, Cursor…</span></div>
+          <div class="b ext"><b>YouTube</b><span>streamed wallpaper</span></div>
+        </div></div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--app)"></i>Swift app (frontend)</span>
+      <span><i style="background:var(--py)"></i>Python/zsh (live backend)</span>
+      <span><i style="background:var(--rust)"></i>Rust engine (built, idle)</span>
+      <span><i style="background:var(--data)"></i>Files &amp; settings</span>
+      <span><i style="background:var(--sys)"></i>macOS pieces we change</span>
+      <span><i style="background:var(--ext)"></i>Outside services</span>
+    </div>
+  </div>
+
+  <h2>2 · What the DesktopGlass mode switch does</h2>
+  <p class="sub">Four places control one setting (<code>island.hideDesktopIcons</code>). The app watches it and
+    applies three changes. Your previous Dock setting is remembered and restored.</p>
+  <div class="card">
+    <pre class="mermaid">
+flowchart LR
+  a1(["Pill switch"]) & a2(["Wallpaper pop-up switch"]) & a3(["Settings → DesktopGlass mode"]) & a4(["Pill right-click menu"]) --> pref[("island.hideDesktopIcons")]
+  pref --> apply["applyIslandPrefs()<br/>runs on every settings change,<br/>acts only on real changes"]
+  apply --> f["FinderDesktopIcons<br/>defaults write CreateDesktop<br/>+ restart Finder"]
+  apply --> d["DockAutoHide<br/>save your setting → autohide on<br/>+ restart Dock"]
+  apply --> w["WallpaperController.refresh()"]
+  w --> q{"Wallpaper set<br/>and mode on?"}
+  q -- no --> none["No windows:<br/>normal macOS wallpaper"]
+  q -- yes --> kind{"Kind"}
+  kind -- image --> img["Image, aspect-fill"]
+  kind -- video file --> vid["AVPlayer loop, muted<br/>pauses when screens sleep"]
+  kind -- YouTube link --> ytb["WebKit + YouTube player<br/>hidden until playing · cropped 18%<br/>skips end screen · resumes when uncovered"]
+  ytb -. "not playing / offline" .-> fb["Fallback file shows underneath"]
+
+  classDef you fill:#8a93a322,stroke:#8a93a3,color:inherit
+  classDef app fill:#2f6fde22,stroke:#2f6fde,color:inherit
+  classDef sys fill:#5b647222,stroke:#5b6472,color:inherit
+  classDef data fill:#2a8a5c22,stroke:#2a8a5c,color:inherit
+  class a1,a2,a3,a4 you
+  class apply,w,q,kind app
+  class f,d,none,img,vid,ytb,fb sys
+  class pref data
+    </pre>
+  </div>
+
+  <h2>3 · Every switch and setting</h2>
+  <div class="card">
+    <table>
+      <tr><th>Where</th><th>Switch / setting</th><th>What it drives</th></tr>
+      <tr><td>Pill</td><td>Photo-stack button</td><td>Opens the wallpaper pop-up below the island</td></tr>
+      <tr><td>Pill · pop-up · Settings · right-click</td><td>DesktopGlass mode</td><td>Icons hidden + wallpaper on + Dock auto-hides</td></tr>
+      <tr><td>Wallpaper pop-up</td><td>Choose File · paste link · Recent · None · Fallback</td><td>WallpaperStore → files in App Support/Wallpapers</td></tr>
+      <tr><td>Settings › Island</td><td>Show the island</td><td>The pill window</td></tr>
+      <tr><td>Settings › Island</td><td>⌘D opens the island</td><td>Event tap, works in every app (takes ⌘D away from other apps); needs Accessibility</td></tr>
+      <tr><td>Settings › Island</td><td>Swipe down from the top</td><td>Event tap for the trackpad gesture</td></tr>
+      <tr><td>Settings › Island</td><td>Wallpaper · Fallback wallpaper</td><td>Same store as the pop-up</td></tr>
+      <tr><td>Settings › Island</td><td>Size</td><td>⌘= / ⌘- island sizes</td></tr>
+      <tr><td>Settings › General</td><td>Shortcut · Launch at login · IDE terminal · Open projects in</td><td>Carbon hotkey, SMAppService, editor choices</td></tr>
+      <tr><td>Settings › Re-indexing</td><td>Written by · Model · Server · Unattended · Sandbox · Schedule</td><td>Which AI backend <code>reindex.sh</code> runs, and when</td></tr>
+      <tr><td>Settings › MCP</td><td>Per-app install toggles</td><td><code>mcp_install.py</code> edits each client's config</td></tr>
+      <tr><td>Overlay</td><td>Terminal</td><td>Starts collapsed on every launch; open with ⌃` or the rail (top-bar button removed)</td></tr>
+    </table>
+  </div>
+
+  <h2>4 · Roadmap: where we are</h2>
+  <div class="grid">
+    <div class="stat"><h3>Rust Phase 0 · Scaffolding <span class="pill done">done</span></h3>
+      <ul><li><code>engine/</code> workspace, <code>dg</code> built universal and copied into the app bundle</li></ul></div>
+    <div class="stat"><h3>Rust Phase 1 · <code>dg inventory</code> <span class="pill wip">ported</span></h3>
+      <ul><li>Rust tests pass; parity with <code>inventory.py</code> 101/101</li>
+        <li>Not done: switch <code>reindex.sh</code>, <code>SKILL.md</code> and the MCP server to call <code>dg</code></li></ul></div>
+    <div class="stat"><h3>Rust Phases 2–4 <span class="pill todo">not started</span></h3>
+      <ul><li>2 Reindex pipeline · 3 MCP server · 4 Installer &amp; hooks</li><li>~9–12 days</li></ul></div>
+    <div class="stat"><h3>Rust Phase 5 · Engine daemon <span class="pill todo">not started</span></h3>
+      <ul><li>Moves non-UI logic out of Swift; defines the protocol</li><li><strong>The extension framework depends on this</strong></li></ul></div>
+    <div class="stat"><h3>Extension framework (.dgapp) <span class="pill todo">planned</span></h3>
+      <ul><li>A0 spec → A1 host → A2 top bar/terminal → A3 web views → A4 GPU → A5 overlay</li>
+        <li>A5w widgets (spec written) → A6 sandbox/install</li><li>~5–6 weeks after Phase 5</li></ul></div>
+    <div class="stat"><h3>Built this session <span class="pill done">shipped</span></h3>
+      <ul><li>⌘D in every app · terminal starts collapsed · top-bar terminal button removed</li>
+        <li>Wallpaper pop-up: file, link, YouTube + fallback</li>
+        <li>DesktopGlass mode: icons + wallpaper + Dock auto-hide</li></ul></div>
+  </div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  const dark = document.documentElement.dataset.theme === 'dark' ||
+    (document.documentElement.dataset.theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+  mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'default', securityLevel: 'strict',
+    flowchart: { curve: 'basis', nodeSpacing: 28, rankSpacing: 46, htmlLabels: true },
+    themeVariables: { fontFamily: '-apple-system, BlinkMacSystemFont, sans-serif', fontSize: '15px',
+      clusterBkg: dark ? '#1d2129' : '#f3f5f8', clusterBorder: dark ? '#353b47' : '#d5dae2' } });
+</script>
+</body>
+</html>

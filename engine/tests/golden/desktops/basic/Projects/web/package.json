@@ -1,0 +1,1 @@
+{"name":"web","description":"  Portfolio site  ","dependencies":{"react":"18","vite":"5","left-pad":"1"},"devDependencies":{"typescript":"5","tailwindcss":"3"}}

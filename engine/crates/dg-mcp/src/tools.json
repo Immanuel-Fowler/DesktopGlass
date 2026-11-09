@@ -1,0 +1,738 @@
+[
+ {
+  "name": "desktop_overview",
+  "description": "The whole Desktop at a glance: every folder's summary and what's in it (desktop-index.md). Start here.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {},
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "list_folder",
+  "description": "One Desktop folder: summary, tags and a blurb for every item inside. Path is Desktop-relative, e.g. 'Projects/MyApp'; empty = Desktop root.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "search_desktop",
+  "description": "Find files, folders and projects on the Desktop by name, blurb or tag.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string"
+    },
+    "limit": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 100
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "query"
+   ]
+  }
+ },
+ {
+  "name": "get_description",
+  "description": "The raw description.md of a Desktop folder (Desktop-relative path).",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "path"
+   ]
+  }
+ },
+ {
+  "name": "recent_changes",
+  "description": "What changed on the Desktop recently: files and folders modified in the last N days, newest first, with their blurbs.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "days": {
+     "type": "number",
+     "minimum": 0.01,
+     "maximum": 365
+    },
+    "limit": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 200
+    }
+   },
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "update_description",
+  "description": "Improve a folder's description.md: set its summary, tags, notes, or individual item blurbs (only what you pass changes). Use after learning what something really is.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    },
+    "summary": {
+     "type": "string"
+    },
+    "tags": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "notes": {
+     "type": "string"
+    },
+    "blurbs": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "string"
+     },
+     "description": "item name → blurb"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "path"
+   ]
+  }
+ },
+ {
+  "name": "list_questions",
+  "description": "Open questions the indexer left about unclear folders.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {},
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "resolve_question",
+  "description": "Answer one of the indexer's open questions. The answer is saved into that folder's Notes so future indexing uses it, and the question is checked off.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "question": {
+     "type": "string",
+     "description": "Any distinctive part of the question text"
+    },
+    "answer": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "question",
+    "answer"
+   ]
+  }
+ },
+ {
+  "name": "index_status",
+  "description": "Backend, model, last run, schedule, problems (e.g. signed out), undescribed folders and open questions.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {},
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "reindex_desktop",
+  "description": "Update the folder descriptions now with the backend chosen in DesktopGlass. Free when nothing changed. Set wait=true to wait for it to finish.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "full": {
+     "type": "boolean",
+     "description": "Rewrite every description"
+    },
+    "wait": {
+     "type": "boolean"
+    }
+   },
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "get_schedule",
+  "description": "When automatic re-indexing runs.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {},
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "set_schedule",
+  "description": "Change automatic re-indexing: off, hourly, every_6_hours or daily (optionally at hour 0-23). Runs are skipped for free when nothing changed.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "schedule": {
+     "type": "string",
+     "enum": [
+      "off",
+      "hourly",
+      "every_6_hours",
+      "daily"
+     ]
+    },
+    "hour": {
+     "type": "integer",
+     "minimum": 0,
+     "maximum": 23
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "schedule"
+   ]
+  }
+ },
+ {
+  "name": "set_index_backend",
+  "description": "Choose what writes the descriptions: claude, codex, gemini, antigravity, cursor, copilot, opencode (agent CLIs) or apple, mlx, ollama, lmstudio, llamacpp (on-device).",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "backend": {
+     "type": "string"
+    },
+    "model": {
+     "type": "string"
+    },
+    "endpoint": {
+     "type": "string",
+     "description": "Server URL for ollama/lmstudio/llamacpp"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "backend"
+   ]
+  }
+ },
+ {
+  "name": "set_preferences",
+  "description": "Indexing preferences shared by every backend: blurb style, status flags, notes for the AI, and per-folder privacy (include, names_only, skip).",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "style": {
+     "type": "string",
+     "enum": [
+      "terse",
+      "sentence"
+     ]
+    },
+    "flag_status": {
+     "type": "boolean"
+    },
+    "notes": {
+     "type": "string"
+    },
+    "folder": {
+     "type": "string",
+     "description": "Desktop-relative folder"
+    },
+    "folder_mode": {
+     "type": "string",
+     "enum": [
+      "include",
+      "names_only",
+      "skip"
+     ]
+    }
+   },
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "open_in_editor",
+  "description": "Open a Desktop file or folder in the DesktopGlass editor (glass IDE with terminal).",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "path"
+   ]
+  }
+ },
+ {
+  "name": "show_overlay",
+  "description": "Show the DesktopGlass overlay.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {},
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "show_artifact",
+  "description": "Display something you made in the DesktopGlass artifact viewer: an HTML/SVG/PDF/image file, a localhost dev server, or a published artifact/canvas/preview URL. Local files live-reload when you rewrite them. Call this whenever you produce a visual artifact or start a web server.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "target": {
+     "type": "string",
+     "description": "File path (absolute, ~/ or Desktop-relative) or URL"
+    },
+    "title": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "target"
+   ]
+  }
+ },
+ {
+  "name": "list_local_servers",
+  "description": "Web servers currently running on this Mac (port, process, page title) — open one with show_artifact.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {},
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "browser_tabs",
+  "description": "Pages open in the artifact viewer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {},
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "browser_read",
+  "description": "Read the page in the artifact viewer: visible text, links and form fields.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tab": {
+     "type": "string",
+     "description": "Tab id (default: the active tab)"
+    },
+    "max_chars": {
+     "type": "integer"
+    }
+   },
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "browser_screenshot",
+  "description": "Screenshot of the page in the artifact viewer.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "tab": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "browser_click",
+  "description": "Click an element in the artifact viewer by CSS selector, or by visible text with 'text=Submit'.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "selector": {
+     "type": "string"
+    },
+    "tab": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "selector"
+   ]
+  }
+ },
+ {
+  "name": "browser_type",
+  "description": "Type into an input/textarea in the artifact viewer (CSS selector); submit=true submits the form.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "selector": {
+     "type": "string"
+    },
+    "text": {
+     "type": "string"
+    },
+    "submit": {
+     "type": "boolean"
+    },
+    "tab": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "selector",
+    "text"
+   ]
+  }
+ },
+ {
+  "name": "browser_eval",
+  "description": "Run JavaScript in the artifact viewer's page and return the result (JSON).",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "script": {
+     "type": "string"
+    },
+    "tab": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "script"
+   ]
+  }
+ },
+ {
+  "name": "browser_navigate",
+  "description": "back, forward, reload or close the page, or go to another artifact URL/file.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "action": {
+     "type": "string",
+     "enum": [
+      "back",
+      "forward",
+      "reload",
+      "close",
+      "go"
+     ]
+    },
+    "url": {
+     "type": "string"
+    },
+    "tab": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "action"
+   ]
+  }
+ },
+ {
+  "name": "html_outline",
+  "description": "Element tree of an HTML file (paths, tags, ids, classes, inline styles, text) plus its linked stylesheets. Use the paths with the other html_* tools.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "path"
+   ]
+  }
+ },
+ {
+  "name": "html_set_style",
+  "description": "Set CSS properties for an element. Written to the page's stylesheet (a rule for its class/id) unless to=inline or to=style_block. Empty value removes a property.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    },
+    "element": {
+     "type": "string",
+     "description": "Path from html_outline (e.g. 1.0.2), #id, .class, tag or tag:N"
+    },
+    "properties": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "string"
+     }
+    },
+    "selector": {
+     "type": "string",
+     "description": "Rule selector (.class or #id); default: the element's first class, else its id"
+    },
+    "to": {
+     "type": "string",
+     "enum": [
+      "stylesheet",
+      "style_block",
+      "inline"
+     ],
+     "description": "Default: the page's linked stylesheet if it has one, else <style>"
+    },
+    "stylesheet": {
+     "type": "string",
+     "description": "Which linked .css file, by name"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "path",
+    "element",
+    "properties"
+   ]
+  }
+ },
+ {
+  "name": "html_split_style",
+  "description": "Give one element its own class split off a shared one, so it can be styled without changing the others. mode=copy copies the base class's styles into the new class and swaps it in; mode=variant keeps the base class and adds the new class for overrides.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    },
+    "element": {
+     "type": "string",
+     "description": "Path from html_outline (e.g. 1.0.2), #id, .class, tag or tag:N"
+    },
+    "new_class": {
+     "type": "string"
+    },
+    "base_class": {
+     "type": "string"
+    },
+    "mode": {
+     "type": "string",
+     "enum": [
+      "copy",
+      "variant"
+     ]
+    },
+    "move_inline": {
+     "type": "boolean",
+     "description": "Move the element's inline styles into the new class (default True)"
+    },
+    "to": {
+     "type": "string",
+     "enum": [
+      "stylesheet",
+      "style_block"
+     ]
+    },
+    "stylesheet": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "path",
+    "element",
+    "new_class"
+   ]
+  }
+ },
+ {
+  "name": "html_group_style",
+  "description": "Make a new class shared by several elements: adds the class to each and writes the given properties into one rule in the stylesheet (or <style>).",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    },
+    "elements": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "description": "Path from html_outline (e.g. 1.0.2), #id, .class, tag or tag:N"
+     }
+    },
+    "class_name": {
+     "type": "string"
+    },
+    "properties": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "string"
+     }
+    },
+    "move_inline": {
+     "type": "boolean",
+     "description": "Remove those properties from the elements' inline styles (default True)"
+    },
+    "to": {
+     "type": "string",
+     "enum": [
+      "stylesheet",
+      "style_block"
+     ]
+    },
+    "stylesheet": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "path",
+    "elements",
+    "class_name"
+   ]
+  }
+ },
+ {
+  "name": "html_set_text",
+  "description": "Replace the text of an element that contains only text.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    },
+    "element": {
+     "type": "string",
+     "description": "Path from html_outline (e.g. 1.0.2), #id, .class, tag or tag:N"
+    },
+    "text": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "path",
+    "element",
+    "text"
+   ]
+  }
+ },
+ {
+  "name": "html_set_html",
+  "description": "Replace an element's text keeping inline formatting, e.g. 'Save <b>40%</b> with <a href=\"/plans\">annual plans</a>'. Only inline tags (b, strong, i, em, a, span, code, br, small, sup, sub, mark…) are allowed, and only for elements that hold text and inline tags.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    },
+    "element": {
+     "type": "string",
+     "description": "Path from html_outline, #id, .class, tag or tag:N"
+    },
+    "html": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "path",
+    "element",
+    "html"
+   ],
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "html_duplicate_element",
+  "description": "Duplicate an element right after itself (ids are dropped from the copy).",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    },
+    "element": {
+     "type": "string",
+     "description": "Path from html_outline (e.g. 1.0.2), #id, .class, tag or tag:N"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "path",
+    "element"
+   ]
+  }
+ },
+ {
+  "name": "html_remove_element",
+  "description": "Remove an element from an HTML file.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "path": {
+     "type": "string"
+    },
+    "element": {
+     "type": "string",
+     "description": "Path from html_outline (e.g. 1.0.2), #id, .class, tag or tag:N"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "path",
+    "element"
+   ]
+  }
+ },
+ {
+  "name": "list_games",
+  "description": "Mac games in the Desktop's Games folder: title, platform (always mac), path, and when it was last played. Filter by query (title).",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string"
+    },
+    "platform": {
+     "type": "string",
+     "description": "Only 'mac' is listed"
+    },
+    "limit": {
+     "type": "integer"
+    }
+   },
+   "additionalProperties": false
+  }
+ },
+ {
+  "name": "play_game",
+  "description": "Start a Mac game from the Games folder. Use a title or path from list_games.",
+  "inputSchema": {
+   "type": "object",
+   "properties": {
+    "game": {
+     "type": "string"
+    }
+   },
+   "additionalProperties": false,
+   "required": [
+    "game"
+   ]
+  }
+ }
+]

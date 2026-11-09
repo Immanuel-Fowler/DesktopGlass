@@ -1,0 +1,16 @@
+# build output
+.build/
+build/
+*.xcodeproj/xcuserdata/
+DerivedData/
+# Python
+__pycache__/
+*.pyc
+# macOS
+.DS_Store
+# generated at install time
+skill/desktopglass-index/scripts/app.json
+# Rust build output
+engine/target/
+# editor
+.vscode/

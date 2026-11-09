@@ -1,0 +1,16 @@
+[package]
+name = "dg-engine"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+description = "The long-running engine: UI link (JSON-RPC over stdio), control channel, shared settings, file watching."
+
+[dependencies]
+dg-core = { path = "../dg-core" }
+dg-index = { path = "../dg-index" }
+dg-platform = { path = "../dg-platform" }
+dg-proto = { path = "../dg-proto" }
+serde_json.workspace = true
+libc.workspace = true
+notify = { version = "6", default-features = false, features = ["macos_fsevent"] }

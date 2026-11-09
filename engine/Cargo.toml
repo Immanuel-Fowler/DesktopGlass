@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = ["crates/dg-core", "crates/dg-proto", "crates/dg-platform", "crates/dg-index", "crates/dg-mcp", "crates/dg-install", "crates/dg-engine", "dg"]
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+publish = false
+
+[workspace.dependencies]
+serde_json = { version = "1", features = ["preserve_order"] }
+libc = "0.2"
+clap = { version = "4", default-features = false, features = ["std", "help", "usage", "error-context"] }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true

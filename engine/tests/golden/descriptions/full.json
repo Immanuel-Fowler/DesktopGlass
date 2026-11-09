@@ -1,0 +1,14 @@
+{
+  "title": "Projects",
+  "summary": "Code I'm building, mostly Swift and web apps.",
+  "tags": ["swift", "web", "ai"],
+  "blurbs": {
+    "DesktopGlass": "Glass overlay for the Desktop",
+    "notes.txt": "scratch notes",
+    "old-site": "archived portfolio",
+    "a-b.md": "hyphen separated",
+    "empty": "",
+    "spaced name.pdf": "extra spaces"
+  },
+  "notes": ["Some folders are archived.", "> A quote inside Notes stays a note"]
+}

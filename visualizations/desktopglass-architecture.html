@@ -1,0 +1,172 @@
+<div id="dg-architecture">
+  <style>
+    #dg-architecture { color: var(--foreground); width: 100%; }
+    #dg-architecture .dg-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 14px; }
+    #dg-architecture .dg-head h2 { margin: 0; }
+    #dg-architecture .dg-head p { margin: 0; color: var(--muted-foreground); }
+    #dg-architecture .dg-flow { display: grid; grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1.15fr) 30px minmax(0, 1fr); align-items: stretch; gap: 8px; }
+    #dg-architecture .dg-lane { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    #dg-architecture .dg-lane-title { font-weight: 500; color: var(--muted-foreground); margin: 0 0 2px; }
+    #dg-architecture .dg-arrow { display: grid; place-items: center; color: var(--muted-foreground); font-weight: 500; }
+    #dg-architecture .dg-node { width: 100%; text-align: left; display: block; white-space: normal; min-height: 64px; }
+    #dg-architecture .dg-node strong { display: block; color: var(--foreground); font-weight: 500; margin-bottom: 3px; }
+    #dg-architecture .dg-node span { display: block; color: var(--muted-foreground); }
+    #dg-architecture .dg-node[data-kind="app"] { background: color-mix(in srgb, var(--viz-series-1) 13%, transparent); }
+    #dg-architecture .dg-node[data-kind="script"] { background: color-mix(in srgb, var(--viz-series-2) 13%, transparent); }
+    #dg-architecture .dg-node[data-kind="data"] { background: color-mix(in srgb, var(--viz-series-3) 13%, transparent); }
+    #dg-architecture .dg-node[data-kind="external"] { background: color-mix(in srgb, var(--viz-series-4) 13%, transparent); }
+    #dg-architecture .dg-bridge { display: grid; grid-template-columns: 1fr 28px 1fr; gap: 8px; align-items: center; margin-top: 10px; }
+    #dg-architecture .dg-detail { margin-top: 14px; }
+    #dg-architecture .dg-detail h3 { margin: 0 0 5px; }
+    #dg-architecture .dg-detail p { margin: 0 0 8px; }
+    #dg-architecture .dg-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+    #dg-architecture .dg-meta div { min-width: 0; }
+    #dg-architecture .dg-meta strong { display: block; font-weight: 500; margin-bottom: 2px; }
+    #dg-architecture .dg-meta code { overflow-wrap: anywhere; }
+    #dg-architecture .dg-legend { display: flex; flex-wrap: wrap; gap: 12px; color: var(--muted-foreground); margin-top: 12px; }
+    #dg-architecture .dg-key { display: inline-flex; align-items: center; gap: 5px; }
+    #dg-architecture .dg-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    #dg-architecture .dg-dot.app { background: var(--viz-series-1); }
+    #dg-architecture .dg-dot.script { background: var(--viz-series-2); }
+    #dg-architecture .dg-dot.data { background: var(--viz-series-3); }
+    #dg-architecture .dg-dot.external { background: var(--viz-series-4); }
+    @media (max-width: 620px) {
+      #dg-architecture .dg-flow { grid-template-columns: 1fr; }
+      #dg-architecture .dg-arrow { min-height: 24px; transform: rotate(90deg); }
+      #dg-architecture .dg-bridge { grid-template-columns: 1fr; }
+      #dg-architecture .dg-bridge .dg-arrow { transform: rotate(90deg); }
+      #dg-architecture .dg-meta { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <div class="dg-head">
+    <h2>DesktopGlass architecture</h2>
+    <p>Choose any component to inspect its role and code ownership.</p>
+  </div>
+
+  <div class="dg-flow" role="group" aria-label="DesktopGlass runtime architecture">
+    <section class="dg-lane" aria-labelledby="dg-input-title">
+      <p class="dg-lane-title" id="dg-input-title">Inputs and clients</p>
+      <button class="btn viz-tile dg-node" type="button" data-id="user" data-kind="external">
+        <strong>User and macOS</strong><span>Hotkey, menus, files, schedule, editor actions</span>
+      </button>
+      <button class="btn viz-tile dg-node" type="button" data-id="mcp-clients" data-kind="external">
+        <strong>MCP clients</strong><span>Claude, Codex, Cursor and compatible tools</span>
+      </button>
+      <button class="btn viz-tile dg-node" type="button" data-id="models" data-kind="external">
+        <strong>AI backends</strong><span>Agent CLIs, Foundation Models, MLX, Ollama, LM Studio</span>
+      </button>
+    </section>
+
+    <div class="dg-arrow" aria-hidden="true">→</div>
+
+    <section class="dg-lane" aria-labelledby="dg-core-title">
+      <p class="dg-lane-title" id="dg-core-title">DesktopGlass.app · Swift</p>
+      <button class="btn viz-tile dg-node" type="button" data-id="app-shell" data-kind="app">
+        <strong>App shell and overlay</strong><span>Lifecycle, hotkey, menus, browsing and settings</span>
+      </button>
+      <button class="btn viz-tile dg-node" type="button" data-id="editor" data-kind="app">
+        <strong>Editor workspace</strong><span>Documents, syntax styling, Markdown visuals and SwiftTerm</span>
+      </button>
+      <button class="btn viz-tile dg-node" type="button" data-id="html" data-kind="app">
+        <strong>Visual HTML editor</strong><span>Source map, safe edits, WebKit preview and inspector</span>
+      </button>
+      <button class="btn viz-tile dg-node" type="button" data-id="artifact-games" data-kind="app">
+        <strong>Artifacts and games</strong><span>Browser tabs, local servers, ROM discovery and launching</span>
+      </button>
+      <button class="btn viz-tile dg-node" type="button" data-id="control" data-kind="app">
+        <strong>Control server</strong><span>Token-authenticated loopback API for automation</span>
+      </button>
+    </section>
+
+    <div class="dg-arrow" aria-hidden="true">↔</div>
+
+    <section class="dg-lane" aria-labelledby="dg-data-title">
+      <p class="dg-lane-title" id="dg-data-title">Files and indexing</p>
+      <button class="btn viz-tile dg-node" type="button" data-id="desktop-files" data-kind="data">
+        <strong>Desktop files</strong><span>Folders plus human-readable description.md files</span>
+      </button>
+      <button class="btn viz-tile dg-node" type="button" data-id="reindex" data-kind="script">
+        <strong>Reindex pipeline</strong><span>Change detection → model description → validated commit</span>
+      </button>
+      <button class="btn viz-tile dg-node" type="button" data-id="index-state" data-kind="data">
+        <strong>_Organize Log</strong><span>Index, manifest, preferences, questions and run log</span>
+      </button>
+      <button class="btn viz-tile dg-node" type="button" data-id="mcp-server" data-kind="script">
+        <strong>Python MCP server</strong><span>35 tools spanning files, indexing and live app control</span>
+      </button>
+    </section>
+  </div>
+
+  <div class="dg-bridge" aria-label="Important internal handoffs">
+    <button class="btn viz-tile dg-node" type="button" data-id="file-contract" data-kind="data">
+      <strong>File contract</strong><span>Plain files are the shared API between Swift, Python, models and people</span>
+    </button>
+    <div class="dg-arrow" aria-hidden="true">↔</div>
+    <button class="btn viz-tile dg-node" type="button" data-id="control-contract" data-kind="app">
+      <strong>Live control contract</strong><span>MCP calls the running app through localhost + per-process token</span>
+    </button>
+  </div>
+
+  <section class="card dg-detail" aria-live="polite" aria-labelledby="dg-detail-title">
+    <h3 id="dg-detail-title">App shell and overlay</h3>
+    <p id="dg-detail-summary">The application wiring hub creates windows, installs global and local keyboard handling, drives the overlay, registers menus and checks the indexing schedule.</p>
+    <div class="dg-meta">
+      <div><strong>Primary code</strong><code id="dg-detail-files">App.swift · AppDelegate.swift · OverlayView.swift · Store.swift · Settings.swift</code></div>
+      <div><strong>Communicates with</strong><span id="dg-detail-links">Desktop files, editor, reindexer, control server and macOS services</span></div>
+      <div><strong>State and boundary</strong><span id="dg-detail-state">SwiftUI observable state + AppKit windows and panels</span></div>
+      <div><strong>Important behavior</strong><span id="dg-detail-behavior">The overlay reads live Desktop state; AI is optional and only participates in description generation.</span></div>
+    </div>
+  </section>
+
+  <div class="dg-legend text-small" aria-label="Component types">
+    <span class="dg-key"><span class="dg-dot app"></span>Swift app</span>
+    <span class="dg-key"><span class="dg-dot script"></span>Python / shell</span>
+    <span class="dg-key"><span class="dg-dot data"></span>Persistent files</span>
+    <span class="dg-key"><span class="dg-dot external"></span>External actor</span>
+  </div>
+
+  <script>
+    (() => {
+      const root = document.getElementById('dg-architecture');
+      const details = {
+        user: ['User and macOS', 'Human actions and operating-system events enter through the floating overlay, editor windows, app menus, global hotkey, Finder file opens and a periodic schedule check.', 'HotKey.swift · AppDelegate.swift · OverlayPanel.swift · EditorWindow.swift', 'App shell, Desktop files, editor and reindexer', 'NSEvent, NSWorkspace, NSMenu, Carbon hotkey and UserDefaults', 'The app is a native macOS 13+ SwiftUI/AppKit hybrid; it can browse and edit without any AI backend.'],
+        'mcp-clients': ['MCP clients', 'External AI applications use JSON-RPC tools over stdio. File-oriented tools work directly; UI and browser operations are forwarded to the running app.', 'skill/desktopglass-index/scripts/mcp_server.py · mcp_install.py', 'Python MCP server and, when needed, the Swift control server', 'JSON-RPC 2.0 over stdio', 'The server exposes 35 tools and can launch the app when a live operation requires it.'],
+        models: ['AI backends', 'A selected agent CLI or local model receives a compact inventory of changed folders and returns terse description content.', 'Harness.swift · FoundationModelsCLI.swift · local_index.py · common.sh', 'Reindex pipeline and local/remote model runtimes', 'Backend-specific process or HTTP boundary', 'Backends never own the index. Their output is validated and committed to ordinary description.md files.'],
+        'app-shell': ['App shell and overlay', 'The application wiring hub creates windows, installs global and local keyboard handling, drives the overlay, registers menus and checks the indexing schedule.', 'App.swift · AppDelegate.swift · OverlayView.swift · Store.swift · Settings.swift', 'Desktop files, editor, reindexer, control server and macOS services', 'SwiftUI observable state + AppKit windows and panels', 'The overlay reads live Desktop state; AI is optional and only participates in description generation.'],
+        editor: ['Editor workspace', 'A native document workspace combines a file tree, tabs, TextKit editing, syntax styling, Markdown presentation and a PTY-backed terminal.', 'Editor/EditorModel.swift · EditorDocument.swift · EditorView.swift · Syntax.swift · MarkdownStyler.swift · Terminal.swift', 'Desktop files, SwiftTerm, visual HTML editor and app shell', 'File-backed documents with observable editor state', 'Temporary TextKit attributes provide highlighting without altering file contents or undo history.'],
+        html: ['Visual HTML editor', 'HTML is parsed into a source map, rendered in WebKit with stable element IDs, then edited through source-range operations so the original file remains authoritative.', 'HTML/HTMLSource.swift · HTML/HTMLVisualEditor.swift', 'Editor document, WKWebView, CSS files and source-map operations', 'Source text is authoritative; WebKit is preview and interaction surface', 'Structural edits trigger a rerender; style-only edits preserve selection and update offsets.'],
+        'artifact-games': ['Artifacts and games', 'The artifact browser safely opens local files and development servers. The games subsystem scans ROMs, detects platforms and dispatches launches to installed emulators.', 'Artifacts/ArtifactBrowser.swift · Games/GameLibrary.swift · GameFinder.swift · EmulatorSupport.swift · GamesLibraryView.swift', 'WebKit, local servers, filesystem, emulators and app shell', 'Browser tab state, game metadata, emulator preferences and play history', 'Artifact navigation is policy-checked; game launching supports platform detection and preferred emulators.'],
+        control: ['Control server', 'A loopback-only Network.framework listener exposes app capabilities that cannot be fulfilled safely by a standalone stdio process.', 'Control/ControlServer.swift · Control/AppControl.swift · Control/LocalServers.swift', 'Python MCP server, artifact browser, reindexer and application controllers', '127.0.0.1 TCP with an ephemeral token stored mode 600', 'control.json exists only while the app runs and records port, token and PID.'],
+        'desktop-files': ['Desktop files', 'The user’s Desktop is the live source of items. Group folders may contain description.md, which people and tools can inspect or edit directly.', 'Models.swift · Store.swift · inventory.py', 'Overlay, editor, indexer and AI backends', 'Ordinary folders and UTF-8 Markdown files', 'No database mediates the content; this keeps the system portable and inspectable.'],
+        reindex: ['Reindex pipeline', 'Every trigger reaches reindex.sh: lock, compare signatures, inventory changed folders, run the chosen backend, validate descriptions, then rebuild the index.', 'Reindexer.swift · reindex.sh · common.sh · inventory.py · local_index.py', 'Desktop files, model backends, preferences and _Organize Log', 'Directory lock + manifest signatures + documented exit codes', 'Unchanged folders keep their blurbs verbatim and an up-to-date run avoids model usage entirely.'],
+        'index-state': ['_Organize Log', 'Generated and operational state stays together in a visible Desktop folder: assembled index, change manifest, preferences, questions and execution log.', 'inventory.py · IndexPreferences.swift · Reindexer.swift', 'Reindex pipeline, overlay status and MCP tools', 'desktop-index.md · .manifest.json · preferences.json · questions.md · reindex.log', 'The index can be reconstructed from per-folder descriptions; the manifest is an optimization, not the source of truth.'],
+        'mcp-server': ['Python MCP server', 'The stdio server provides file discovery, search, description updates, indexing, question handling and app-backed browser/control operations.', 'skill/desktopglass-index/scripts/mcp_server.py', 'MCP clients, Desktop files and Swift control server', 'Stateless request handling plus filesystem and authenticated localhost calls', 'Path validation confines direct file tools to the Desktop boundary.'],
+        'file-contract': ['File contract', 'description.md is the central interoperability boundary. Swift and Python parse the same line-oriented format, while people and models can author it.', 'Models.swift · inventory.py · local_index.py · skill/desktopglass-index/SKILL.md', 'Swift UI, Python indexing, AI backends and the user', '# title · > summary · Tags · Contents bullets · Notes', 'This is the architectural center: files remain authoritative even when the app or model backend is unavailable.'],
+        'control-contract': ['Live control contract', 'Operations requiring the running application cross a narrow authenticated boundary rather than duplicating AppKit and WebKit behavior in Python.', 'ControlServer.swift · AppControl.swift · mcp_server.py', 'MCP server and live DesktopGlass.app', 'Loopback JSON messages with token, port and PID discovery', 'The split keeps direct file tools lightweight while preserving rich browser, screenshot and schedule operations.']
+      };
+      const fields = {
+        title: root.querySelector('#dg-detail-title'),
+        summary: root.querySelector('#dg-detail-summary'),
+        files: root.querySelector('#dg-detail-files'),
+        links: root.querySelector('#dg-detail-links'),
+        state: root.querySelector('#dg-detail-state'),
+        behavior: root.querySelector('#dg-detail-behavior')
+      };
+      root.querySelectorAll('[data-id]').forEach(button => {
+        button.addEventListener('click', () => {
+          const d = details[button.dataset.id];
+          if (!d) return;
+          root.querySelectorAll('[data-id]').forEach(n => n.setAttribute('aria-pressed', String(n === button)));
+          fields.title.textContent = d[0];
+          fields.summary.textContent = d[1];
+          fields.files.textContent = d[2];
+          fields.links.textContent = d[3];
+          fields.state.textContent = d[4];
+          fields.behavior.textContent = d[5];
+        });
+      });
+      root.querySelector('[data-id="app-shell"]').setAttribute('aria-pressed', 'true');
+    })();
+  </script>
+</div>
